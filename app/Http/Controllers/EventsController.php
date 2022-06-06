@@ -9,6 +9,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Date;
 use DB;
+use Carbon\Carbon;
 
 class EventsController extends BaseController
 {
@@ -189,6 +190,21 @@ class EventsController extends BaseController
      */
 
     public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+        // throw new \Exception('implement in coding task 2');
+        try {
+            $events =  Event::with(['workshop' => function($query){
+                $query->whereDate('start', '>', Carbon::now());
+            }])->get();
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        
+        for($i=0;$i<$events->count();$i++) {
+            if($events[$i]['workshop']->count() == 0) {
+                unset($events[$i]);
+            }
+        }
+
+        return $events;
     }
 }
